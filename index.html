@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedSense AI - Intelligent Clinical Disease Detection & Triage System</title>
+    <meta name="description" content="A transparent, intelligent symptom-based disease detection system with Bayesian Inference and Differential Diagnosis Engine.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ==========================================================================
+         Header Navigation Bar
+         ========================================================================== -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="brand-wrapper">
+                <div class="brand-icon">🩺</div>
+                <div>
+                    <div class="brand-title">MedSense AI <span class="brand-badge">Clinical Engine</span></div>
+                </div>
+            </a>
+            
+            <div class="nav-actions">
+                <button id="themeToggleBtn" class="btn-icon-only" title="Toggle Light / Dark Mode">
+                    <span id="themeIcon">☀️</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ==========================================================================
+         Hero & Demo Presets Bar
+         ========================================================================== -->
+    <header class="hero-banner">
+        <div class="hero-card">
+            <div class="hero-header-row">
+                <div class="hero-text">
+                    <h2>Smart Disease Prediction & Clinical Decision Support</h2>
+                    <p>Select multiple clinical symptoms or pick a pre-configured scenario to evaluate the probabilistic inference engine.</p>
+                </div>
+            </div>
+            <div class="preset-scroll-container">
+                <span class="preset-label">⚡ 1-Click Demo Scenarios:</span>
+                <div id="presetsContainer" style="display: flex; gap: 0.5rem;">
+                    <!-- Demo preset chips rendered via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==========================================================================
+         Main Workspace Layout
+         ========================================================================== -->
+    <main class="main-container">
+
+        <!-- Left Column: Interactive Symptom Selector -->
+        <section class="glass-panel symptom-column">
+            <div class="panel-header">
+                <div>
+                    <h3 class="panel-title"><span>📋</span> Symptom Catalog</h3>
+                    <p class="panel-subtitle">Select observed symptoms to trigger real-time inference</p>
+                </div>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-box-wrapper">
+                <div class="search-input-group">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="symptomSearchInput" class="search-input" placeholder="Search symptom (e.g. fever, headache, cough, rash)..." autocomplete="off">
+                </div>
+            </div>
+
+            <!-- Active Selected Symptoms -->
+            <div class="selected-section">
+                <div class="selected-header">
+                    <span style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">
+                        Selected Symptoms <span id="selectedCountBadge" class="selected-count-badge">0</span>
+                    </span>
+                    <button id="clearAllBtn" class="btn-clear-all" style="display: none;">Clear All ✕</button>
+                </div>
+                <div id="selectedChipsContainer" class="selected-chips-container">
+                    <span class="no-symptoms-placeholder">No symptoms selected yet. Click from the list below or use a quick demo preset.</span>
+                </div>
+            </div>
+
+            <!-- Category Filter Tabs -->
+            <div id="categoryTabsContainer" class="category-tabs-wrapper">
+                <button class="category-tab active" data-category="all">All Systems</button>
+                <!-- Category buttons injected via JS -->
+            </div>
+
+            <!-- Symptom Grid List -->
+            <div id="symptomGrid" class="symptom-grid-scroll">
+                <!-- Symptom cards dynamically generated from dataset.js -->
+            </div>
+        </section>
+
+        <!-- Right Column: Diagnostic & Differential Results -->
+        <section class="results-wrapper">
+
+            <!-- Idle State (When no symptoms selected) -->
+            <div id="idleStateCard" class="glass-panel idle-state-card">
+                <div class="idle-icon-anim">🔬</div>
+                <h3 class="idle-title">Awaiting Clinical Symptoms</h3>
+                <p class="idle-desc">
+                    Choose 2 or more symptoms from the catalog on the left or click any <strong>1-Click Demo Scenario</strong> above to view instant probabilistic diagnosis, triage rating, precautions, and mathematical breakdown.
+                </p>
+                <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+                    <button id="quickSampleBtn" class="btn btn-secondary">
+                        <span>🧪</span> Load Sample (Dengue Fever)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Diagnosis Container (Hidden when idle) -->
+            <div id="diagnosisActiveContainer" style="display: none; flex-direction: column; gap: 1.25rem;">
+                
+                <!-- Main Diagnosis Card -->
+                <div class="diagnosis-main-card">
+                    <div class="diagnosis-header-badge-row">
+                        <span class="primary-diagnosis-tag">
+                            <span>⭐</span> Primary Matched Condition
+                        </span>
+                        <span id="triageBadge" class="triage-badge triage-moderate">
+                            Moderate Severity
+                        </span>
+                    </div>
+
+                    <div class="diagnosis-body">
+                        <div class="disease-title-row">
+                            <div>
+                                <h2 id="diseaseName" class="disease-name">Dengue Fever</h2>
+                                <p id="diseaseCategory" class="disease-category-subtitle">Vector-borne Viral Infection</p>
+                            </div>
+                            <div class="confidence-gauge-box">
+                                <div id="confidenceScore" class="gauge-pct">94%</div>
+                                <div class="gauge-label">Confidence</div>
+                            </div>
+                        </div>
+
+                        <p id="diseaseSummary" class="disease-summary-text">
+                            A mosquito-borne viral infection caused by the Dengue virus transmitted primarily by female Aedes aegypti mosquitoes.
+                        </p>
+
+                        <!-- Clinical Meta Grid -->
+                        <div class="clinical-meta-grid">
+                            <div class="meta-box">
+                                <div class="meta-box-header"><span>👨‍⚕️</span> Recommended Specialist</div>
+                                <div id="specialistValue" class="meta-box-value">General Physician</div>
+                            </div>
+                            <div class="meta-box">
+                                <div class="meta-box-header"><span>🚨</span> Clinical Urgency</div>
+                                <div id="urgencyValue" class="meta-box-value" style="color: #fb923c;">Urgent Medical Attention</div>
+                            </div>
+                        </div>
+
+                        <!-- Clinical Insight Callout -->
+                        <div class="clinical-insight">
+                            <div class="insight-header">
+                                <span>💡</span> Clinical Insight & Diagnostic Triad
+                            </div>
+                            <div id="clinicalInsightText" class="insight-text">
+                                Key differentiator: Characterized by high fever, retro-orbital eye pain, and severe bone aches with sudden platelet drop.
+                            </div>
+                        </div>
+
+                        <!-- Accordion Sections -->
+                        <div class="clinical-accordion">
+                            <!-- Precautions -->
+                            <div class="accordion-item">
+                                <div class="accordion-header" onclick="toggleAccordion(this)">
+                                    <span>🛡️ Clinical Precautions & First Aid</span>
+                                    <span>▼</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <ul id="precautionsList" class="bullet-list">
+                                        <!-- Precautions injected via JS -->
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Dietary Recommendations -->
+                            <div class="accordion-item">
+                                <div class="accordion-header" onclick="toggleAccordion(this)">
+                                    <span>🥗 Dietary & Nutritional Guidance</span>
+                                    <span>▼</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <div style="margin-bottom: 0.5rem;">
+                                        <strong style="color: #34d399; font-size: 0.8rem;">RECOMMENDED FOODS:</strong>
+                                        <ul id="dietRecommendedList" class="bullet-list" style="margin-top: 0.25rem;"></ul>
+                                    </div>
+                                    <div>
+                                        <strong style="color: #f87171; font-size: 0.8rem;">FOODS TO AVOID:</strong>
+                                        <ul id="dietAvoidList" class="bullet-list" style="margin-top: 0.25rem;"></ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recommended Diagnostic Tests -->
+                            <div class="accordion-item">
+                                <div class="accordion-header" onclick="toggleAccordion(this)">
+                                    <span>🔬 Confirmatory Lab Tests to Prescribe</span>
+                                    <span>▼</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <ul id="testsList" class="bullet-list">
+                                        <!-- Tests injected via JS -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Differential Diagnoses Panel -->
+                <div class="differential-panel">
+                    <h4 style="font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem;">
+                        <span>📊</span> Differential Diagnoses (Top Alternative Matches)
+                    </h4>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem;">
+                        Probabilistic comparison of other prospective medical conditions sharing overlapping symptom profiles.
+                    </p>
+                    <div id="differentialList" class="differential-list">
+                        <!-- Differential list items injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Calculation / Algorithmic Transparency Box -->
+                <div class="differential-panel" style="background: rgba(15, 23, 42, 0.7); border: 1px dashed rgba(56, 189, 248, 0.4);">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 0.4rem;">
+                        <span>📐</span> Inference Breakdown: How this prediction was derived
+                    </h4>
+                    <div id="liveMathExplanation" style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.5;">
+                        <!-- Live calculation step explanation injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Action Footer -->
+                <div class="results-action-footer">
+                    <button id="printReportBtn" class="btn btn-secondary">
+                        <span>🖨️</span> Print / Save Medical Summary
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Watermark printed only on official print output -->
+    <div class="print-watermark">
+        MedSense AI Clinical Diagnostic & Differential Analysis System • Clinical Decision Support & Educational Reference
+    </div>
+
+    <!-- Scripts -->
+    <script src="dataset.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

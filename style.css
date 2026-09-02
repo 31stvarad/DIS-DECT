@@ -1,0 +1,1003 @@
+/* ==========================================================================
+   MEDSENSE AI - CLINICAL DISEASE DETECTOR & TRIAGE SYSTEM
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+:root {
+    /* Color Palette - Modern Medical Dark/Light */
+    --bg-app: #090d16;
+    --bg-surface: rgba(18, 26, 43, 0.75);
+    --bg-surface-elevated: rgba(28, 40, 65, 0.85);
+    --bg-card: rgba(22, 33, 54, 0.65);
+    --bg-glass-border: rgba(255, 255, 255, 0.08);
+    --bg-glass-border-hover: rgba(56, 189, 248, 0.35);
+
+    /* Text Colors */
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    --text-highlight: #38bdf8;
+
+    /* Brand Accents */
+    --primary-gradient: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 50%, #6366f1 100%);
+    --teal-glow: #06b6d4;
+    --emerald-green: #10b981;
+    --amber-warning: #f59e0b;
+    --rose-danger: #f43f5e;
+    --purple-accent: #8b5cf6;
+
+    /* Triage / Severity Levels */
+    --severity-mild: #10b981;
+    --severity-moderate: #f59e0b;
+    --severity-high: #f97316;
+    --severity-critical: #ef4444;
+
+    /* Shadow & Glassmorphism */
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
+    --glow-cyan: 0 0 25px rgba(14, 165, 233, 0.3);
+    --glow-purple: 0 0 25px rgba(139, 92, 246, 0.3);
+
+    /* Radius & Spacing */
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-full: 9999px;
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="light"] {
+    --bg-app: #f1f5f9;
+    --bg-surface: rgba(255, 255, 255, 0.9);
+    --bg-surface-elevated: #ffffff;
+    --bg-card: rgba(248, 250, 252, 0.9);
+    --bg-glass-border: rgba(203, 213, 225, 0.7);
+    --bg-glass-border-hover: rgba(14, 165, 233, 0.6);
+
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --text-dim: #94a3b8;
+    --text-highlight: #0284c7;
+
+    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.12);
+}
+
+/* ==========================================================================
+   Base & Layout Reset
+   ========================================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    min-height: 100vh;
+    line-height: 1.5;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.05) 0px, transparent 60%);
+    background-attachment: fixed;
+    transition: background-color var(--transition-smooth), color var(--transition-smooth);
+}
+
+h1, h2, h3, h4, .brand-title {
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.02em;
+}
+
+button, input, select {
+    font-family: inherit;
+}
+
+/* ==========================================================================
+   Navigation Bar
+   ========================================================================== */
+
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--bg-glass-border);
+    padding: 0.85rem 1.5rem;
+}
+
+.nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+.brand-icon {
+    width: 42px;
+    height: 42px;
+    background: var(--primary-gradient);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    box-shadow: var(--glow-cyan);
+}
+
+.brand-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.brand-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.2rem 0.5rem;
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    color: #38bdf8;
+    border-radius: var(--radius-full);
+    -webkit-text-fill-color: #38bdf8;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-secondary {
+    background: var(--bg-surface-elevated);
+    border-color: var(--bg-glass-border);
+    color: var(--text-main);
+}
+
+.btn-secondary:hover {
+    border-color: var(--bg-glass-border-hover);
+    transform: translateY(-1px);
+}
+
+.btn-icon-only {
+    padding: 0.6rem;
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--bg-glass-border);
+    color: var(--text-main);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.btn-icon-only:hover {
+    border-color: var(--bg-glass-border-hover);
+}
+
+/* ==========================================================================
+   Hero & Quick Demo Presets Banner
+   ========================================================================== */
+
+.hero-banner {
+    max-width: 1400px;
+    margin: 1.5rem auto 1rem auto;
+    padding: 0 1.5rem;
+}
+
+.hero-card {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.12) 0%, rgba(99, 102, 241, 0.08) 100%);
+    border: 1px solid var(--bg-glass-border);
+    backdrop-filter: blur(12px);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.hero-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.hero-text h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.hero-text p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.preset-scroll-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.35rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--bg-glass-border-hover) transparent;
+}
+
+.preset-scroll-container::-webkit-scrollbar {
+    height: 4px;
+}
+.preset-scroll-container::-webkit-scrollbar-thumb {
+    background: var(--bg-glass-border-hover);
+    border-radius: 4px;
+}
+
+.preset-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+    white-space: nowrap;
+}
+
+.preset-chip {
+    white-space: nowrap;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--bg-glass-border);
+    color: var(--text-main);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all var(--transition-fast);
+}
+
+.preset-chip:hover {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   Main Workspace Layout
+   ========================================================================== */
+
+.main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.75rem 1.5rem 3rem 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 1.75rem;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .main-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Glass Card Container */
+.glass-panel {
+    background: var(--bg-surface);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--bg-glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    transition: border-color var(--transition-fast);
+}
+
+.glass-panel:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.panel-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--bg-glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.panel-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.panel-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+}
+
+/* ==========================================================================
+   Left Column: Symptom Input Engine
+   ========================================================================== */
+
+.search-box-wrapper {
+    padding: 1.25rem 1.5rem 0.75rem 1.5rem;
+}
+
+.search-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--text-dim);
+    font-size: 1rem;
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.6rem;
+    background: var(--bg-card);
+    border: 1px solid var(--bg-glass-border);
+    border-radius: var(--radius-md);
+    color: var(--text-main);
+    font-size: 0.9rem;
+    outline: none;
+    transition: all var(--transition-fast);
+}
+
+.search-input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+
+/* Selected Symptoms Bar */
+.selected-section {
+    padding: 0.5rem 1.5rem 1rem 1.5rem;
+    border-bottom: 1px solid var(--bg-glass-border);
+}
+
+.selected-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.selected-count-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    background: rgba(14, 165, 233, 0.2);
+    color: #38bdf8;
+    border-radius: var(--radius-full);
+}
+
+.btn-clear-all {
+    background: none;
+    border: none;
+    color: var(--rose-danger);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-clear-all:hover {
+    text-decoration: underline;
+}
+
+.selected-chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    min-height: 38px;
+    align-items: center;
+}
+
+.selected-chip {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(99, 102, 241, 0.25) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    color: #e0f2fe;
+    padding: 0.35rem 0.65rem;
+    border-radius: var(--radius-md);
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    animation: scaleIn 0.2s ease-out;
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.chip-remove-btn {
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1;
+    border-radius: 50%;
+    padding: 0 2px;
+}
+
+.chip-remove-btn:hover {
+    color: var(--rose-danger);
+}
+
+.no-symptoms-placeholder {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    font-style: italic;
+}
+
+/* Category Filter Tabs */
+.category-tabs-wrapper {
+    padding: 0.75rem 1.5rem 0.5rem 1.5rem;
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.category-tabs-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.category-tab {
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--bg-glass-border);
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--transition-fast);
+}
+
+.category-tab.active, .category-tab:hover {
+    background: var(--bg-surface-elevated);
+    border-color: #38bdf8;
+    color: #38bdf8;
+}
+
+/* Symptom Grid List */
+.symptom-grid-scroll {
+    padding: 0.75rem 1.5rem 1.5rem 1.5rem;
+    max-height: 480px;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.6rem;
+}
+
+.symptom-card {
+    background: var(--bg-card);
+    border: 1px solid var(--bg-glass-border);
+    border-radius: var(--radius-md);
+    padding: 0.65rem 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    user-select: none;
+}
+
+.symptom-card:hover {
+    border-color: var(--bg-glass-border-hover);
+    background: var(--bg-surface-elevated);
+    transform: translateY(-1px);
+}
+
+.symptom-card.selected {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+    border-color: #38bdf8;
+    box-shadow: 0 0 12px rgba(14, 165, 233, 0.2);
+}
+
+.symptom-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.symptom-info {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.symptom-name {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.symptom-cat-badge {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+}
+
+.symptom-checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1.5px solid var(--text-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: transparent;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.symptom-card.selected .symptom-checkbox {
+    background: #38bdf8;
+    border-color: #38bdf8;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   Right Column: Diagnostic & Clinical Results
+   ========================================================================== */
+
+.results-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Idle State Card */
+.idle-state-card {
+    padding: 3.5rem 2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.idle-icon-anim {
+    font-size: 3.5rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.idle-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.idle-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    max-width: 440px;
+}
+
+/* Active Diagnosis Main Card */
+.diagnosis-main-card {
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--bg-glass-border);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+.diagnosis-header-badge-row {
+    padding: 1rem 1.5rem;
+    background: linear-gradient(90deg, rgba(14, 165, 233, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%);
+    border-bottom: 1px solid var(--bg-glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.primary-diagnosis-tag {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #38bdf8;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.triage-badge {
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.triage-mild { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+.triage-moderate { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+.triage-high { background: rgba(249, 115, 22, 0.2); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.4); }
+.triage-critical { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+.diagnosis-body {
+    padding: 1.5rem;
+}
+
+.disease-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.disease-name {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.2;
+}
+
+.disease-category-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+}
+
+/* Radial Confidence Score Meter */
+.confidence-gauge-box {
+    text-align: center;
+    flex-shrink: 0;
+    background: var(--bg-card);
+    padding: 0.6rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--bg-glass-border);
+}
+
+.gauge-pct {
+    font-size: 1.6rem;
+    font-weight: 800;
+    font-family: 'Outfit', sans-serif;
+    color: #38bdf8;
+    line-height: 1;
+}
+
+.gauge-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-top: 0.2rem;
+}
+
+.disease-summary-text {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
+}
+
+/* Info Grid: Specialist, Matched Symptoms, Red Flags */
+.clinical-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+}
+
+@media (max-width: 640px) {
+    .clinical-meta-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.meta-box {
+    background: var(--bg-card);
+    border: 1px solid var(--bg-glass-border);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+}
+
+.meta-box-header {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.35rem;
+}
+
+.meta-box-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+/* Clinical Insight Pill */
+.clinical-insight {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(56, 189, 248, 0.1) 100%);
+    border: 1px dashed rgba(168, 85, 247, 0.4);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.insight-header {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #c084fc;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-bottom: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.insight-text {
+    font-size: 0.85rem;
+    color: var(--text-main);
+    line-height: 1.45;
+}
+
+/* Accordion Sections: Precautions, Diet, Tests */
+.clinical-accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.accordion-item {
+    border: 1px solid var(--bg-glass-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--bg-card);
+}
+
+.accordion-header {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    background: var(--bg-card);
+    transition: background var(--transition-fast);
+}
+
+.accordion-header:hover {
+    background: var(--bg-surface-elevated);
+}
+
+.accordion-content {
+    padding: 0 1rem 0.85rem 1rem;
+    font-size: 0.83rem;
+    color: var(--text-muted);
+}
+
+.bullet-list {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.bullet-list li {
+    position: relative;
+    padding-left: 1.25rem;
+    line-height: 1.4;
+}
+
+.bullet-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0.35rem;
+    color: #38bdf8;
+    font-weight: bold;
+}
+
+/* Differential Diagnoses Card */
+.differential-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--bg-glass-border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+}
+
+.differential-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+}
+
+.diff-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.65rem 0.85rem;
+    background: var(--bg-card);
+    border: 1px solid var(--bg-glass-border);
+    border-radius: var(--radius-md);
+}
+
+.diff-name-box {
+    flex: 1;
+}
+
+.diff-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.diff-category {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+}
+
+.diff-bar-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.diff-progress-bg {
+    flex-grow: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.diff-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #38bdf8, #818cf8);
+    border-radius: var(--radius-full);
+    transition: width 0.4s ease-out;
+}
+
+.diff-pct {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #38bdf8;
+    width: 38px;
+    text-align: right;
+}
+
+/* Action Footer: Print, Summary */
+.results-action-footer {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+}
+
+/* ==========================================================================
+   Print Stylesheet for Medical Summary Report
+   ========================================================================== */
+
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        background-image: none !important;
+    }
+
+    .navbar, .hero-banner, .symptom-column, .results-action-footer, .modal-backdrop, .category-tabs-wrapper {
+        display: none !important;
+    }
+
+    .main-container {
+        display: block !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+    }
+
+    .results-wrapper, .diagnosis-main-card, .differential-panel {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+
+    .diagnosis-header-badge-row {
+        background: #f1f5f9 !important;
+        border-bottom: 1px solid #ccc !important;
+    }
+
+    .disease-name {
+        color: #0284c7 !important;
+    }
+
+    .meta-box, .accordion-item {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+    }
+
+    .print-watermark {
+        display: block !important;
+        text-align: center;
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-top: 2rem;
+        border-top: 1px solid #ccc;
+        padding-top: 0.5rem;
+    }
+}
+
+.print-watermark {
+    display: none;
+}
