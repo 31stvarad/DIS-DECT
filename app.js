@@ -3,7 +3,6 @@
  * Implements Probabilistic Bayesian & Weighted Symptom Matching with Full Algorithmic Explainability.
  */
 
-// Application State
 const state = {
     selectedSymptoms: new Set(),
     activeCategory: 'all',
