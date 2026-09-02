@@ -1,11 +1,16 @@
 /**
  * MedSense AI - Core Application & Inference Engine
- * Implements Probabilistic Bayesian & Weighted Symptom Matching
- * with Full Algorithmic Explainability.
+ * --------------------------------------------------
+ * Probabilistic Bayesian & Weighted Symptom Matching
+ * with Algorithmic Explainability.
+ *
+ * IMPORTANT:
+ * This application provides an algorithmic symptom-matching
+ * result and is NOT a medically validated diagnosis.
  */
 
 /* ==========================================================================
-   Application State
+   APPLICATION STATE
    ========================================================================== */
 
 const state = {
@@ -15,260 +20,381 @@ const state = {
     currentTheme: localStorage.getItem('medsense_theme') || 'dark'
 };
 
+
 /* ==========================================================================
-   DOM Element References
+   DOM ELEMENT REFERENCES
    ========================================================================== */
 
-// IMPORTANT:
-// DOM references are initialized inside DOMContentLoaded.
-// This prevents null references when app.js loads before the HTML.
+// Do NOT query the DOM here.
+// The HTML may not have loaded yet.
 
 let elements = {};
 
+
 /* ==========================================================================
-   Initialization
+   INITIALIZATION
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Initialize DOM references AFTER HTML has loaded
+    initializeElements();
+
+    initTheme();
+
+    renderPresets();
+
+    renderCategoryTabs();
+
+    renderSymptomGrid();
+
+    setupEventListeners();
+
+    updateUI();
+
+});
+
+
+/* ==========================================================================
+   INITIALIZE DOM ELEMENTS
+   ========================================================================== */
+
+function initializeElements() {
+
     elements = {
-        // Theme
+
+        /* Theme */
         themeToggleBtn: document.getElementById('themeToggleBtn'),
         themeIcon: document.getElementById('themeIcon'),
 
-        // Main containers
+        /* Main UI */
         presetsContainer: document.getElementById('presetsContainer'),
         categoryTabsContainer: document.getElementById('categoryTabsContainer'),
         symptomGrid: document.getElementById('symptomGrid'),
         symptomSearchInput: document.getElementById('symptomSearchInput'),
 
-        // Selected symptoms
-        selectedChipsContainer: document.getElementById('selectedChipsContainer'),
-        selectedCountBadge: document.getElementById('selectedCountBadge'),
-        clearAllBtn: document.getElementById('clearAllBtn'),
+        /* Selected symptoms */
+        selectedChipsContainer:
+            document.getElementById('selectedChipsContainer'),
 
-        // Diagnosis containers
-        idleStateCard: document.getElementById('idleStateCard'),
-        diagnosisActiveContainer: document.getElementById('diagnosisActiveContainer'),
+        selectedCountBadge:
+            document.getElementById('selectedCountBadge'),
 
-        // Diagnosis card fields
-        diseaseName: document.getElementById('diseaseName'),
-        diseaseCategory: document.getElementById('diseaseCategory'),
-        confidenceScore: document.getElementById('confidenceScore'),
-        triageBadge: document.getElementById('triageBadge'),
-        diseaseSummary: document.getElementById('diseaseSummary'),
-        specialistValue: document.getElementById('specialistValue'),
-        urgencyValue: document.getElementById('urgencyValue'),
-        clinicalInsightText: document.getElementById('clinicalInsightText'),
+        clearAllBtn:
+            document.getElementById('clearAllBtn'),
 
-        // Lists
-        precautionsList: document.getElementById('precautionsList'),
-        dietRecommendedList: document.getElementById('dietRecommendedList'),
-        dietAvoidList: document.getElementById('dietAvoidList'),
-        testsList: document.getElementById('testsList'),
-        differentialList: document.getElementById('differentialList'),
+        /* Diagnosis */
+        idleStateCard:
+            document.getElementById('idleStateCard'),
 
-        // Explanation
-        liveMathExplanation: document.getElementById('liveMathExplanation'),
+        diagnosisActiveContainer:
+            document.getElementById('diagnosisActiveContainer'),
 
-        // Buttons
-        printReportBtn: document.getElementById('printReportBtn'),
-        quickSampleBtn: document.getElementById('quickSampleBtn')
+        /* Diagnosis fields */
+        diseaseName:
+            document.getElementById('diseaseName'),
+
+        diseaseCategory:
+            document.getElementById('diseaseCategory'),
+
+        confidenceScore:
+            document.getElementById('confidenceScore'),
+
+        triageBadge:
+            document.getElementById('triageBadge'),
+
+        diseaseSummary:
+            document.getElementById('diseaseSummary'),
+
+        specialistValue:
+            document.getElementById('specialistValue'),
+
+        urgencyValue:
+            document.getElementById('urgencyValue'),
+
+        clinicalInsightText:
+            document.getElementById('clinicalInsightText'),
+
+        /* Lists */
+        precautionsList:
+            document.getElementById('precautionsList'),
+
+        dietRecommendedList:
+            document.getElementById('dietRecommendedList'),
+
+        dietAvoidList:
+            document.getElementById('dietAvoidList'),
+
+        testsList:
+            document.getElementById('testsList'),
+
+        differentialList:
+            document.getElementById('differentialList'),
+
+        /* Explanation */
+        liveMathExplanation:
+            document.getElementById('liveMathExplanation'),
+
+        /* Buttons */
+        printReportBtn:
+            document.getElementById('printReportBtn'),
+
+        quickSampleBtn:
+            document.getElementById('quickSampleBtn')
     };
 
-    // Check for missing required DOM elements
-    validateDOMElements();
 
-    // Initialize application
-    initTheme();
-    renderPresets();
-    renderCategoryTabs();
-    renderSymptomGrid();
-    setupEventListeners();
-    updateUI();
-});
+    console.log('MedSense AI: DOM initialized successfully.');
+
+    checkRequiredElements();
+}
 
 
 /* ==========================================================================
-   DOM Validation
+   CHECK DOM ELEMENTS
    ========================================================================== */
 
-function validateDOMElements() {
-    const requiredElements = {
-        themeToggleBtn: 'themeToggleBtn',
-        themeIcon: 'themeIcon',
-        presetsContainer: 'presetsContainer',
-        categoryTabsContainer: 'categoryTabsContainer',
-        symptomGrid: 'symptomGrid',
-        symptomSearchInput: 'symptomSearchInput',
-        selectedChipsContainer: 'selectedChipsContainer',
-        selectedCountBadge: 'selectedCountBadge',
-        clearAllBtn: 'clearAllBtn',
-        idleStateCard: 'idleStateCard',
-        diagnosisActiveContainer: 'diagnosisActiveContainer',
-        diseaseName: 'diseaseName',
-        diseaseCategory: 'diseaseCategory',
-        confidenceScore: 'confidenceScore',
-        triageBadge: 'triageBadge',
-        diseaseSummary: 'diseaseSummary',
-        specialistValue: 'specialistValue',
-        urgencyValue: 'urgencyValue',
-        clinicalInsightText: 'clinicalInsightText',
-        precautionsList: 'precautionsList',
-        dietRecommendedList: 'dietRecommendedList',
-        dietAvoidList: 'dietAvoidList',
-        testsList: 'testsList',
-        differentialList: 'differentialList',
-        liveMathExplanation: 'liveMathExplanation',
-        printReportBtn: 'printReportBtn',
-        quickSampleBtn: 'quickSampleBtn'
-    };
+function checkRequiredElements() {
+
+    const required = [
+        'themeToggleBtn',
+        'presetsContainer',
+        'categoryTabsContainer',
+        'symptomGrid',
+        'symptomSearchInput',
+        'selectedChipsContainer',
+        'selectedCountBadge',
+        'clearAllBtn',
+        'idleStateCard',
+        'diagnosisActiveContainer'
+    ];
+
 
     const missing = [];
 
-    Object.entries(requiredElements).forEach(([property, id]) => {
-        if (!elements[property]) {
-            missing.push(`#${id}`);
+
+    required.forEach(key => {
+
+        if (!elements[key]) {
+            missing.push(key);
         }
+
     });
 
+
     if (missing.length > 0) {
-        console.error(
-            'MedSense AI: The following HTML elements were not found:',
-            missing.join(', ')
+
+        console.warn(
+            'MedSense AI: Missing HTML elements:',
+            missing
         );
 
-        console.error(
-            'Please make sure these IDs exist in your HTML.'
+    }
+
+
+    // themeIcon is intentionally optional.
+    // If it doesn't exist, the application will create it.
+    if (!elements.themeIcon && elements.themeToggleBtn) {
+
+        const icon = document.createElement('span');
+
+        icon.id = 'themeIcon';
+
+        icon.setAttribute(
+            'aria-hidden',
+            'true'
+        );
+
+        icon.style.marginLeft = '6px';
+
+        elements.themeToggleBtn.appendChild(icon);
+
+        elements.themeIcon = icon;
+
+        console.log(
+            'MedSense AI: #themeIcon was missing and has been created automatically.'
         );
     }
 }
 
 
 /* ==========================================================================
-   Theme Management
+   THEME MANAGEMENT
    ========================================================================== */
 
 function initTheme() {
+
     document.documentElement.setAttribute(
         'data-theme',
         state.currentTheme
     );
 
+
+    /*
+     * Prevents:
+     *
+     * Cannot set properties of null
+     *
+     * even if #themeIcon does not exist.
+     */
+
     if (elements.themeIcon) {
+
         elements.themeIcon.textContent =
-            state.currentTheme === 'dark' ? '☀️' : '🌙';
+            state.currentTheme === 'dark'
+                ? '☀️'
+                : '🌙';
+
     }
 }
 
 
 function toggleTheme() {
+
     state.currentTheme =
-        state.currentTheme === 'dark' ? 'light' : 'dark';
+        state.currentTheme === 'dark'
+            ? 'light'
+            : 'dark';
+
 
     document.documentElement.setAttribute(
         'data-theme',
         state.currentTheme
     );
+
 
     localStorage.setItem(
         'medsense_theme',
         state.currentTheme
     );
 
+
     if (elements.themeIcon) {
+
         elements.themeIcon.textContent =
-            state.currentTheme === 'dark' ? '☀️' : '🌙';
+            state.currentTheme === 'dark'
+                ? '☀️'
+                : '🌙';
+
     }
 }
 
 
 /* ==========================================================================
-   Render Presets
+   PRESETS
    ========================================================================== */
 
 function renderPresets() {
 
-    if (!elements.presetsContainer) return;
+    if (!elements.presetsContainer) {
+        return;
+    }
+
 
     elements.presetsContainer.innerHTML = '';
+
 
     if (
         typeof DEMO_PRESETS === 'undefined' ||
         !Array.isArray(DEMO_PRESETS)
     ) {
-        console.error(
+
+        console.warn(
             'MedSense AI: DEMO_PRESETS is not defined.'
         );
+
         return;
     }
 
+
     DEMO_PRESETS.forEach(preset => {
 
-        const btn = document.createElement('button');
+        const button =
+            document.createElement('button');
 
-        btn.className = 'preset-chip';
 
-        btn.innerHTML = `
+        button.type = 'button';
+
+        button.className =
+            'preset-chip';
+
+
+        button.innerHTML = `
             <span>▶</span>
             ${escapeHTML(preset.title || 'Demo')}
         `;
 
-        btn.title = preset.description || '';
 
-        btn.addEventListener('click', () => {
-            loadPreset(preset.symptoms || []);
-        });
+        button.title =
+            preset.description || '';
 
-        elements.presetsContainer.appendChild(btn);
+
+        button.addEventListener(
+            'click',
+            () => {
+
+                loadPreset(
+                    Array.isArray(preset.symptoms)
+                        ? preset.symptoms
+                        : []
+                );
+
+            }
+        );
+
+
+        elements.presetsContainer
+            .appendChild(button);
+
     });
 }
 
 
 /* ==========================================================================
-   Load Preset
+   LOAD PRESET
    ========================================================================== */
 
 function loadPreset(symptomIds) {
 
     state.selectedSymptoms.clear();
 
+
     if (Array.isArray(symptomIds)) {
 
         symptomIds.forEach(id => {
+
             state.selectedSymptoms.add(id);
+
         });
 
     }
 
+
     renderSymptomGrid();
+
     updateUI();
 }
 
 
 /* ==========================================================================
-   Render Category Tabs
+   CATEGORY TABS
    ========================================================================== */
 
 function renderCategoryTabs() {
 
-    if (!elements.categoryTabsContainer) return;
+    if (!elements.categoryTabsContainer) {
+        return;
+    }
+
 
     /*
-     * Clear existing generated tabs.
-     *
-     * If your HTML already contains an "All" button,
-     * we preserve it.
+     * Remove generated category tabs.
+     * Preserve an existing All tab if the HTML has one.
      */
-    const existingAllTab =
-        elements.categoryTabsContainer.querySelector(
-            '[data-category="all"]'
-        );
 
-    // Remove generated category tabs except "All"
     elements.categoryTabsContainer
-        .querySelectorAll('.category-tab:not([data-category="all"])')
+        .querySelectorAll(
+            '.category-tab:not([data-category="all"])'
+        )
         .forEach(tab => tab.remove());
 
 
@@ -276,117 +402,180 @@ function renderCategoryTabs() {
         typeof SYMPTOM_CATEGORIES === 'undefined' ||
         !SYMPTOM_CATEGORIES
     ) {
-        console.error(
+
+        console.warn(
             'MedSense AI: SYMPTOM_CATEGORIES is not defined.'
         );
+
         return;
     }
 
 
-    Object.entries(SYMPTOM_CATEGORIES).forEach(([key, cat]) => {
+    /*
+     * Check whether All tab already exists.
+     */
 
-        // Don't create a duplicate All tab
-        if (key === 'all') return;
+    let allTab =
+        elements.categoryTabsContainer
+            .querySelector(
+                '[data-category="all"]'
+            );
 
-        const btn = document.createElement('button');
 
-        btn.className =
-            `category-tab ${
-                state.activeCategory === key ? 'active' : ''
-            }`;
+    /*
+     * Create All tab if it doesn't exist.
+     */
 
-        btn.dataset.category = key;
+    if (!allTab) {
 
-        btn.innerHTML = `
-            ${cat.icon || ''}
-            ${escapeHTML(cat.name || key)}
-        `;
+        allTab =
+            document.createElement('button');
 
-        btn.addEventListener('click', () => {
 
-            state.activeCategory = key;
+        allTab.type = 'button';
 
-            document
-                .querySelectorAll('.category-tab')
-                .forEach(tab => {
-                    tab.classList.remove('active');
-                });
+        allTab.className =
+            'category-tab';
 
-            btn.classList.add('active');
+
+        allTab.dataset.category =
+            'all';
+
+
+        allTab.innerHTML =
+            '📋 All';
+
+
+        elements.categoryTabsContainer
+            .prepend(allTab);
+
+    }
+
+
+    updateCategoryTabState();
+
+
+    /*
+     * All tab listener
+     */
+
+    allTab.addEventListener(
+        'click',
+        () => {
+
+            state.activeCategory =
+                'all';
+
+            updateCategoryTabState();
 
             renderSymptomGrid();
-        });
 
-        elements.categoryTabsContainer.appendChild(btn);
+        }
+    );
+
+
+    /*
+     * Other categories
+     */
+
+    Object.entries(
+        SYMPTOM_CATEGORIES
+    ).forEach(([key, category]) => {
+
+        if (key === 'all') {
+            return;
+        }
+
+
+        const button =
+            document.createElement('button');
+
+
+        button.type = 'button';
+
+        button.className =
+            'category-tab';
+
+
+        button.dataset.category =
+            key;
+
+
+        button.innerHTML = `
+            ${category.icon || ''}
+            ${escapeHTML(category.name || key)}
+        `;
+
+
+        button.addEventListener(
+            'click',
+            () => {
+
+                state.activeCategory =
+                    key;
+
+                updateCategoryTabState();
+
+                renderSymptomGrid();
+
+            }
+        );
+
+
+        elements.categoryTabsContainer
+            .appendChild(button);
+
     });
 
 
-    // Handle All tab if it exists
-    if (existingAllTab) {
-
-        existingAllTab.addEventListener('click', () => {
-
-            state.activeCategory = 'all';
-
-            document
-                .querySelectorAll('.category-tab')
-                .forEach(tab => {
-                    tab.classList.remove('active');
-                });
-
-            existingAllTab.classList.add('active');
-
-            renderSymptomGrid();
-        });
-
-    } else {
-
-        // If All doesn't exist in HTML, create it
-        const allTab = document.createElement('button');
-
-        allTab.className =
-            `category-tab ${
-                state.activeCategory === 'all' ? 'active' : ''
-            }`;
-
-        allTab.dataset.category = 'all';
-
-        allTab.innerHTML = '📋 All';
-
-        allTab.addEventListener('click', () => {
-
-            state.activeCategory = 'all';
-
-            document
-                .querySelectorAll('.category-tab')
-                .forEach(tab => {
-                    tab.classList.remove('active');
-                });
-
-            allTab.classList.add('active');
-
-            renderSymptomGrid();
-        });
-
-        elements.categoryTabsContainer.prepend(allTab);
-    }
+    updateCategoryTabState();
 }
 
 
 /* ==========================================================================
-   Render Symptom Grid
+   UPDATE CATEGORY TAB STATE
+   ========================================================================== */
+
+function updateCategoryTabState() {
+
+    if (!elements.categoryTabsContainer) {
+        return;
+    }
+
+
+    elements.categoryTabsContainer
+        .querySelectorAll('.category-tab')
+        .forEach(tab => {
+
+            tab.classList.toggle(
+                'active',
+                tab.dataset.category ===
+                state.activeCategory
+            );
+
+        });
+}
+
+
+/* ==========================================================================
+   SYMPTOM GRID
    ========================================================================== */
 
 function renderSymptomGrid() {
 
-    if (!elements.symptomGrid) return;
+    if (!elements.symptomGrid) {
+        return;
+    }
+
 
     elements.symptomGrid.innerHTML = '';
+
 
     if (
         typeof SYMPTOMS_LIST === 'undefined' ||
         !Array.isArray(SYMPTOMS_LIST)
     ) {
+
         elements.symptomGrid.innerHTML = `
             <div style="
                 grid-column:1/-1;
@@ -398,41 +587,59 @@ function renderSymptomGrid() {
             </div>
         `;
 
+
         console.error(
             'MedSense AI: SYMPTOMS_LIST is not defined.'
         );
+
 
         return;
     }
 
 
     const query =
-        state.searchQuery.toLowerCase().trim();
+        String(state.searchQuery || '')
+            .toLowerCase()
+            .trim();
 
 
     const filteredSymptoms =
         SYMPTOMS_LIST.filter(symptom => {
 
-            const matchesCat =
+            const matchesCategory =
                 state.activeCategory === 'all' ||
-                symptom.category === state.activeCategory;
+                symptom.category ===
+                state.activeCategory;
+
 
             const symptomName =
-                String(symptom.name || '').toLowerCase();
+                String(symptom.name || '')
+                    .toLowerCase();
+
 
             const symptomId =
-                String(symptom.id || '').toLowerCase();
+                String(symptom.id || '')
+                    .toLowerCase();
 
-            const matchesQuery =
+
+            const matchesSearch =
                 query === '' ||
                 symptomName.includes(query) ||
                 symptomId.includes(query);
 
-            return matchesCat && matchesQuery;
+
+            return (
+                matchesCategory &&
+                matchesSearch
+            );
+
         });
 
 
-    // No results
+    /*
+     * No results
+     */
+
     if (filteredSymptoms.length === 0) {
 
         elements.symptomGrid.innerHTML = `
@@ -444,19 +651,27 @@ function renderSymptomGrid() {
                 font-size:0.85rem;
             ">
                 No symptoms found matching
-                "<strong>${escapeHTML(state.searchQuery)}</strong>".
+                "<strong>${escapeHTML(
+                    state.searchQuery
+                )}</strong>".
             </div>
         `;
+
 
         return;
     }
 
 
-    // Render symptoms
+    /*
+     * Render symptoms
+     */
+
     filteredSymptoms.forEach(symptom => {
 
-        const isSelected =
-            state.selectedSymptoms.has(symptom.id);
+        const selected =
+            state.selectedSymptoms.has(
+                symptom.id
+            );
 
 
         const card =
@@ -465,17 +680,39 @@ function renderSymptomGrid() {
 
         card.className =
             `symptom-card ${
-                isSelected ? 'selected' : ''
+                selected ? 'selected' : ''
             }`;
 
 
+        card.setAttribute(
+            'role',
+            'button'
+        );
+
+
+        card.setAttribute(
+            'tabindex',
+            '0'
+        );
+
+
         const categoryName =
-            SYMPTOM_CATEGORIES?.[symptom.category]?.name ||
-            symptom.category ||
-            'General';
+            (
+                typeof SYMPTOM_CATEGORIES !==
+                'undefined' &&
+                SYMPTOM_CATEGORIES &&
+                SYMPTOM_CATEGORIES[
+                    symptom.category
+                ]
+            )
+                ? SYMPTOM_CATEGORIES[
+                    symptom.category
+                ].name
+                : symptom.category || 'General';
 
 
         card.innerHTML = `
+
             <span class="symptom-icon">
                 ${symptom.icon || '🩺'}
             </span>
@@ -484,65 +721,121 @@ function renderSymptomGrid() {
 
                 <div
                     class="symptom-name"
-                    title="${escapeHTML(symptom.name || '')}"
+                    title="${escapeHTML(
+                        symptom.name || ''
+                    )}"
                 >
-                    ${escapeHTML(symptom.name || 'Unknown')}
+                    ${escapeHTML(
+                        symptom.name ||
+                        'Unknown symptom'
+                    )}
                 </div>
 
                 <div class="symptom-cat-badge">
-                    ${escapeHTML(categoryName)}
+                    ${escapeHTML(
+                        categoryName
+                    )}
                 </div>
 
             </div>
 
             <div class="symptom-checkbox">
-                ${isSelected ? '✓' : ''}
+                ${selected ? '✓' : ''}
             </div>
+
         `;
 
 
-        card.addEventListener('click', () => {
-            toggleSymptom(symptom.id);
-        });
+        /*
+         * Mouse click
+         */
+
+        card.addEventListener(
+            'click',
+            () => {
+
+                toggleSymptom(
+                    symptom.id
+                );
+
+            }
+        );
 
 
-        elements.symptomGrid.appendChild(card);
+        /*
+         * Keyboard accessibility
+         */
+
+        card.addEventListener(
+            'keydown',
+            event => {
+
+                if (
+                    event.key === 'Enter' ||
+                    event.key === ' '
+                ) {
+
+                    event.preventDefault();
+
+                    toggleSymptom(
+                        symptom.id
+                    );
+
+                }
+
+            }
+        );
+
+
+        elements.symptomGrid
+            .appendChild(card);
+
     });
 }
 
 
 /* ==========================================================================
-   Toggle Symptom
+   TOGGLE SYMPTOM
    ========================================================================== */
 
 function toggleSymptom(symptomId) {
 
-    if (state.selectedSymptoms.has(symptomId)) {
+    if (
+        state.selectedSymptoms.has(
+            symptomId
+        )
+    ) {
 
-        state.selectedSymptoms.delete(symptomId);
+        state.selectedSymptoms.delete(
+            symptomId
+        );
 
     } else {
 
-        state.selectedSymptoms.add(symptomId);
+        state.selectedSymptoms.add(
+            symptomId
+        );
 
     }
 
+
     renderSymptomGrid();
+
     updateUI();
 }
 
 
 /* ==========================================================================
-   Render Selected Symptom Chips
+   SELECTED SYMPTOM CHIPS
    ========================================================================== */
 
 function renderSelectedChips() {
 
     if (
         !elements.selectedChipsContainer ||
-        !elements.selectedCountBadge ||
-        !elements.clearAllBtn
+        !elements.selectedCountBadge
     ) {
+
         return;
     }
 
@@ -555,89 +848,146 @@ function renderSelectedChips() {
         count;
 
 
-    elements.clearAllBtn.style.display =
-        count > 0 ? 'inline-block' : 'none';
+    if (elements.clearAllBtn) {
 
+        elements.clearAllBtn.style.display =
+            count > 0
+                ? 'inline-block'
+                : 'none';
+
+    }
+
+
+    /*
+     * Empty state
+     */
 
     if (count === 0) {
 
         elements.selectedChipsContainer.innerHTML = `
+
             <span class="no-symptoms-placeholder">
                 No symptoms selected yet.
                 Click from the list below or use a quick demo preset.
             </span>
+
         `;
 
         return;
     }
 
 
-    elements.selectedChipsContainer.innerHTML = '';
+    elements.selectedChipsContainer.innerHTML =
+        '';
 
 
-    state.selectedSymptoms.forEach(symptomId => {
+    state.selectedSymptoms
+        .forEach(symptomId => {
 
-        const symptom =
-            SYMPTOMS_LIST.find(
-                s => s.id === symptomId
-            );
-
-
-        if (!symptom) return;
-
-
-        const chip =
-            document.createElement('div');
+            const symptom =
+                SYMPTOMS_LIST.find(
+                    item =>
+                        item.id ===
+                        symptomId
+                );
 
 
-        chip.className =
-            'selected-chip';
+            if (!symptom) {
+                return;
+            }
 
 
-        chip.innerHTML = `
-            <span>${symptom.icon || '🩺'}</span>
-
-            <span>
-                ${escapeHTML(symptom.name || 'Unknown')}
-            </span>
-
-            <span
-                class="chip-remove-btn"
-                title="Remove ${escapeHTML(symptom.name || '')}"
-            >
-                ✕
-            </span>
-        `;
+            const chip =
+                document.createElement('div');
 
 
-        const removeButton =
-            chip.querySelector(
-                '.chip-remove-btn'
-            );
+            chip.className =
+                'selected-chip';
 
 
-        if (removeButton) {
+            chip.innerHTML = `
 
-            removeButton.addEventListener(
-                'click',
-                event => {
+                <span>
+                    ${symptom.icon || '🩺'}
+                </span>
 
-                    event.stopPropagation();
+                <span>
+                    ${escapeHTML(
+                        symptom.name ||
+                        'Unknown'
+                    )}
+                </span>
 
-                    toggleSymptom(symptomId);
-                }
-            );
-        }
+                <span
+                    class="chip-remove-btn"
+                    title="Remove ${escapeHTML(
+                        symptom.name || ''
+                    )}"
+                    role="button"
+                    tabindex="0"
+                >
+                    ✕
+                </span>
+
+            `;
 
 
-        elements.selectedChipsContainer
-            .appendChild(chip);
-    });
+            const removeButton =
+                chip.querySelector(
+                    '.chip-remove-btn'
+                );
+
+
+            if (removeButton) {
+
+                removeButton.addEventListener(
+                    'click',
+                    event => {
+
+                        event.stopPropagation();
+
+                        toggleSymptom(
+                            symptomId
+                        );
+
+                    }
+                );
+
+
+                removeButton.addEventListener(
+                    'keydown',
+                    event => {
+
+                        if (
+                            event.key === 'Enter' ||
+                            event.key === ' '
+                        ) {
+
+                            event.preventDefault();
+
+                            event.stopPropagation();
+
+                            toggleSymptom(
+                                symptomId
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            elements.selectedChipsContainer
+                .appendChild(chip);
+
+        });
 }
 
 
 /* ==========================================================================
-   Core Probabilistic Inference Engine
+   INFERENCE ENGINE
    ========================================================================== */
 
 function runInference() {
@@ -645,6 +995,7 @@ function runInference() {
     if (
         state.selectedSymptoms.size === 0
     ) {
+
         return null;
     }
 
@@ -653,6 +1004,7 @@ function runInference() {
         typeof SYMPTOMS_LIST === 'undefined' ||
         !Array.isArray(SYMPTOMS_LIST)
     ) {
+
         console.error(
             'MedSense AI: SYMPTOMS_LIST is unavailable.'
         );
@@ -665,6 +1017,7 @@ function runInference() {
         typeof DISEASES_DATABASE === 'undefined' ||
         !Array.isArray(DISEASES_DATABASE)
     ) {
+
         console.error(
             'MedSense AI: DISEASES_DATABASE is unavailable.'
         );
@@ -674,14 +1027,16 @@ function runInference() {
 
 
     const selectedArray =
-        Array.from(state.selectedSymptoms);
+        Array.from(
+            state.selectedSymptoms
+        );
 
 
     const scoredDiseases = [];
 
 
     /* ----------------------------------------------------------------------
-       Build symptom weight map
+       Symptom weight map
        ---------------------------------------------------------------------- */
 
     const symptomWeightMap =
@@ -692,14 +1047,14 @@ function runInference() {
 
         symptomWeightMap.set(
             symptom.id,
-            symptom.weight || 2.0
+            Number(symptom.weight) || 2.0
         );
 
     });
 
 
     /* ----------------------------------------------------------------------
-       Calculate total weight of selected symptoms
+       Total user symptom weight
        ---------------------------------------------------------------------- */
 
     let userTotalWeight = 0;
@@ -708,120 +1063,148 @@ function runInference() {
     selectedArray.forEach(id => {
 
         userTotalWeight +=
-            symptomWeightMap.get(id) || 2.0;
+            symptomWeightMap.get(id) ||
+            2.0;
 
     });
 
 
     /* ----------------------------------------------------------------------
-       Score each disease
+       Score diseases
        ---------------------------------------------------------------------- */
 
     DISEASES_DATABASE.forEach(disease => {
 
-        let matchedPrimaryWeight = 0;
-        let matchedSecondaryWeight = 0;
-
-        let matchedPrimaryCount = 0;
-        let matchedSecondaryCount = 0;
-
-
-        const matchedPrimaryNames = [];
-        const matchedSecondaryNames = [];
-
-
         const primarySymptoms =
-            Array.isArray(disease.primarySymptoms)
+            Array.isArray(
+                disease.primarySymptoms
+            )
                 ? disease.primarySymptoms
                 : [];
 
 
         const secondarySymptoms =
-            Array.isArray(disease.secondarySymptoms)
+            Array.isArray(
+                disease.secondarySymptoms
+            )
                 ? disease.secondarySymptoms
                 : [];
 
 
-        /* ------------------------------------------------------------------
-           Primary symptoms
-           ------------------------------------------------------------------ */
+        let matchedPrimaryWeight = 0;
 
-        primarySymptoms.forEach(pId => {
+        let matchedSecondaryWeight = 0;
 
-            if (
-                state.selectedSymptoms.has(pId)
-            ) {
+        let matchedPrimaryCount = 0;
 
-                const weight =
-                    symptomWeightMap.get(pId) || 2.0;
+        let matchedSecondaryCount = 0;
 
 
-                matchedPrimaryWeight +=
-                    weight * 1.0;
+        const matchedPrimaryNames = [];
+
+        const matchedSecondaryNames = [];
 
 
-                matchedPrimaryCount++;
+        /* Primary symptoms */
+
+        primarySymptoms.forEach(
+            symptomId => {
+
+                if (
+                    state.selectedSymptoms
+                        .has(symptomId)
+                ) {
+
+                    const weight =
+                        symptomWeightMap.get(
+                            symptomId
+                        ) || 2.0;
 
 
-                const symptom =
-                    SYMPTOMS_LIST.find(
-                        s => s.id === pId
-                    );
+                    matchedPrimaryWeight +=
+                        weight;
 
 
-                if (symptom) {
-                    matchedPrimaryNames.push(
-                        symptom.name
-                    );
+                    matchedPrimaryCount++;
+
+
+                    const symptom =
+                        SYMPTOMS_LIST.find(
+                            item =>
+                                item.id ===
+                                symptomId
+                        );
+
+
+                    if (symptom) {
+
+                        matchedPrimaryNames
+                            .push(
+                                symptom.name
+                            );
+
+                    }
+
                 }
+
             }
-        });
+        );
 
 
-        /* ------------------------------------------------------------------
-           Secondary symptoms
-           ------------------------------------------------------------------ */
+        /* Secondary symptoms */
 
-        secondarySymptoms.forEach(sId => {
+        secondarySymptoms.forEach(
+            symptomId => {
 
-            if (
-                state.selectedSymptoms.has(sId)
-            ) {
+                if (
+                    state.selectedSymptoms
+                        .has(symptomId)
+                ) {
 
-                const weight =
-                    symptomWeightMap.get(sId) || 2.0;
-
-
-                matchedSecondaryWeight +=
-                    weight * 0.45;
+                    const weight =
+                        symptomWeightMap.get(
+                            symptomId
+                        ) || 2.0;
 
 
-                matchedSecondaryCount++;
+                    matchedSecondaryWeight +=
+                        weight * 0.45;
 
 
-                const symptom =
-                    SYMPTOMS_LIST.find(
-                        s => s.id === sId
-                    );
+                    matchedSecondaryCount++;
 
 
-                if (symptom) {
-                    matchedSecondaryNames.push(
-                        symptom.name
-                    );
+                    const symptom =
+                        SYMPTOMS_LIST.find(
+                            item =>
+                                item.id ===
+                                symptomId
+                        );
+
+
+                    if (symptom) {
+
+                        matchedSecondaryNames
+                            .push(
+                                symptom.name
+                            );
+
+                    }
+
                 }
+
             }
-        });
+        );
 
 
-        /* ------------------------------------------------------------------
-           Calculate scores
-           ------------------------------------------------------------------ */
+        /* Total */
 
         const totalMatchedWeight =
             matchedPrimaryWeight +
             matchedSecondaryWeight;
 
+
+        /* Coverage */
 
         const primaryCoverage =
             primarySymptoms.length > 0
@@ -830,6 +1213,8 @@ function runInference() {
                 : 0;
 
 
+        /* User alignment */
+
         const userAlignment =
             userTotalWeight > 0
                 ? totalMatchedWeight /
@@ -837,26 +1222,41 @@ function runInference() {
                 : 0;
 
 
+        /*
+         * Combined score.
+         */
+
         let rawScore =
             (primaryCoverage * 0.65) +
             (userAlignment * 0.35);
 
 
         /*
-         * Boost when multiple primary symptoms match.
+         * Multiple primary symptom boost.
          */
-        if (matchedPrimaryCount >= 2) {
+
+        if (
+            matchedPrimaryCount >= 2
+        ) {
 
             rawScore *=
-                1.0 +
-                (matchedPrimaryCount * 0.15);
+                1 +
+                (
+                    matchedPrimaryCount *
+                    0.15
+                );
+
         }
 
 
         /*
-         * Only include diseases with at least one match.
+         * Only include diseases with
+         * at least one matched symptom.
          */
-        if (totalMatchedWeight > 0) {
+
+        if (
+            totalMatchedWeight > 0
+        ) {
 
             scoredDiseases.push({
 
@@ -877,28 +1277,33 @@ function runInference() {
                 primaryCoverage
 
             });
+
         }
 
     });
 
 
-    if (scoredDiseases.length === 0) {
+    if (
+        scoredDiseases.length === 0
+    ) {
+
         return null;
     }
 
 
     /* ----------------------------------------------------------------------
-       Sort by score
+       Sort
        ---------------------------------------------------------------------- */
 
     scoredDiseases.sort(
         (a, b) =>
-            b.rawScore - a.rawScore
+            b.rawScore -
+            a.rawScore
     );
 
 
     /* ----------------------------------------------------------------------
-       Calculate top confidence
+       Top match
        ---------------------------------------------------------------------- */
 
     const topMatch =
@@ -910,23 +1315,26 @@ function runInference() {
 
 
     /*
-     * UI confidence score.
+     * IMPORTANT:
      *
-     * NOTE:
-     * This is a heuristic matching score, NOT a medically validated
-     * probability of having the disease.
+     * This is a UI confidence heuristic,
+     * not a medically validated probability.
      */
 
-    let topConfidence =
+    const calculatedConfidence =
+        Math.round(
+            (topMatch.primaryCoverage * 60) +
+            (topMatch.matchedPrimaryCount * 10) +
+            20
+        );
+
+
+    const topConfidence =
         Math.min(
             98,
             Math.max(
                 70,
-                Math.round(
-                    (topMatch.primaryCoverage * 60) +
-                    (topMatch.matchedPrimaryCount * 10) +
-                    20
-                )
+                calculatedConfidence
             )
         );
 
@@ -949,15 +1357,19 @@ function runInference() {
                     (maxRaw || 1);
 
 
+                const calculatedDiff =
+                    Math.round(
+                        topConfidence *
+                        diffRatio *
+                        0.85
+                    );
+
+
                 const diffPct =
                     Math.max(
                         15,
                         Math.min(
-                            Math.round(
-                                topConfidence *
-                                diffRatio *
-                                0.85
-                            ),
+                            calculatedDiff,
                             topConfidence - 8
                         )
                     );
@@ -965,9 +1377,11 @@ function runInference() {
 
                 return {
 
-                    disease: item.disease,
+                    disease:
+                        item.disease,
 
-                    confidence: diffPct,
+                    confidence:
+                        diffPct,
 
                     matchedPrimaryCount:
                         item.matchedPrimaryCount
@@ -979,18 +1393,20 @@ function runInference() {
 
     return {
 
-        primary: topMatch,
+        primary:
+            topMatch,
 
         differentials,
 
-        allScored: scoredDiseases
+        allScored:
+            scoredDiseases
 
     };
 }
 
 
 /* ==========================================================================
-   Update Diagnosis UI
+   UPDATE UI
    ========================================================================== */
 
 function updateUI() {
@@ -1002,39 +1418,55 @@ function updateUI() {
         runInference();
 
 
-    /* ----------------------------------------------------------------------
-       No diagnosis
-       ---------------------------------------------------------------------- */
+    /*
+     * No result
+     */
 
     if (!result) {
 
         if (elements.idleStateCard) {
+
             elements.idleStateCard.style.display =
                 'flex';
+
         }
 
-        if (elements.diagnosisActiveContainer) {
-            elements.diagnosisActiveContainer.style.display =
+
+        if (
+            elements.diagnosisActiveContainer
+        ) {
+
+            elements.diagnosisActiveContainer
+                .style.display =
                 'none';
+
         }
+
 
         return;
     }
 
 
-    /* ----------------------------------------------------------------------
-       Show diagnosis
-       ---------------------------------------------------------------------- */
+    /*
+     * Show result
+     */
 
     if (elements.idleStateCard) {
+
         elements.idleStateCard.style.display =
             'none';
+
     }
 
 
-    if (elements.diagnosisActiveContainer) {
-        elements.diagnosisActiveContainer.style.display =
+    if (
+        elements.diagnosisActiveContainer
+    ) {
+
+        elements.diagnosisActiveContainer
+            .style.display =
             'flex';
+
     }
 
 
@@ -1047,7 +1479,7 @@ function updateUI() {
 
 
     /* ----------------------------------------------------------------------
-       Main diagnosis information
+       Main fields
        ---------------------------------------------------------------------- */
 
     setText(
@@ -1093,7 +1525,7 @@ function updateUI() {
 
 
     /* ----------------------------------------------------------------------
-       Triage badge
+       Triage
        ---------------------------------------------------------------------- */
 
     if (elements.triageBadge) {
@@ -1150,7 +1582,9 @@ function updateUI() {
                     '🔴 Critical • Immediate Emergency Triage';
 
                 break;
+
         }
+
     }
 
 
@@ -1158,237 +1592,318 @@ function updateUI() {
        Precautions
        ---------------------------------------------------------------------- */
 
-    const precautions =
-        Array.isArray(disease.precautions)
-            ? disease.precautions
-            : [];
-
-
-    if (elements.precautionsList) {
-
-        elements.precautionsList.innerHTML =
-            precautions
-                .map(item => `<li>${escapeHTML(item)}</li>`)
-                .join('');
-    }
+    renderList(
+        elements.precautionsList,
+        disease.precautions
+    );
 
 
     /* ----------------------------------------------------------------------
-       Dietary recommendations
+       Diet
        ---------------------------------------------------------------------- */
 
     const dietaryAdvice =
         disease.dietaryAdvice || {};
 
 
-    const recommended =
-        Array.isArray(dietaryAdvice.recommended)
-            ? dietaryAdvice.recommended
-            : [];
+    renderList(
+        elements.dietRecommendedList,
+        dietaryAdvice.recommended
+    );
 
 
-    const avoid =
-        Array.isArray(dietaryAdvice.avoid)
-            ? dietaryAdvice.avoid
-            : [];
-
-
-    if (elements.dietRecommendedList) {
-
-        elements.dietRecommendedList.innerHTML =
-            recommended
-                .map(item => `<li>${escapeHTML(item)}</li>`)
-                .join('');
-    }
-
-
-    if (elements.dietAvoidList) {
-
-        elements.dietAvoidList.innerHTML =
-            avoid
-                .map(item => `<li>${escapeHTML(item)}</li>`)
-                .join('');
-    }
+    renderList(
+        elements.dietAvoidList,
+        dietaryAdvice.avoid
+    );
 
 
     /* ----------------------------------------------------------------------
-       Diagnostic tests
+       Tests
        ---------------------------------------------------------------------- */
 
-    const diagnosticTests =
-        Array.isArray(disease.diagnosticTests)
-            ? disease.diagnosticTests
-            : [];
-
-
-    if (elements.testsList) {
-
-        elements.testsList.innerHTML =
-            diagnosticTests
-                .map(item => `<li>${escapeHTML(item)}</li>`)
-                .join('');
-    }
+    renderList(
+        elements.testsList,
+        disease.diagnosticTests
+    );
 
 
     /* ----------------------------------------------------------------------
-       Differential diagnoses
+       Differential
        ---------------------------------------------------------------------- */
 
-    if (elements.differentialList) {
-
-        if (result.differentials.length > 0) {
-
-            elements.differentialList.innerHTML =
-                result.differentials
-                    .map(diff => {
-
-                        return `
-                            <div class="diff-item">
-
-                                <div class="diff-name-box">
-
-                                    <div class="diff-title">
-                                        ${escapeHTML(
-                                            diff.disease.name || 'Unknown'
-                                        )}
-                                    </div>
-
-                                    <div class="diff-category">
-                                        ${escapeHTML(
-                                            diff.disease.category || ''
-                                        )}
-                                    </div>
-
-                                </div>
-
-                                <div class="diff-bar-wrapper">
-
-                                    <div class="diff-progress-bg">
-
-                                        <div
-                                            class="diff-progress-fill"
-                                            style="width:${diff.confidence}%"
-                                        ></div>
-
-                                    </div>
-
-                                    <span class="diff-pct">
-                                        ${diff.confidence}%
-                                    </span>
-
-                                </div>
-
-                            </div>
-                        `;
-
-                    })
-                    .join('');
-
-        } else {
-
-            elements.differentialList.innerHTML = `
-                <div style="
-                    font-size:0.8rem;
-                    color:var(--text-dim);
-                    padding:0.5rem 0;
-                ">
-                    No significant secondary differential
-                    candidates detected.
-                </div>
-            `;
-        }
-    }
+    renderDifferentials(
+        result.differentials
+    );
 
 
     /* ----------------------------------------------------------------------
-       Live Mathematical Explanation
+       Mathematical explanation
        ---------------------------------------------------------------------- */
 
-    const matchedSymptomsList =
-        [
-            ...primaryData.matchedPrimaryNames,
-            ...primaryData.matchedSecondaryNames
-        ].join(', ');
-
-
-    if (elements.liveMathExplanation) {
-
-        elements.liveMathExplanation.innerHTML = `
-
-            <strong>
-                Step 1: Input Vector Encoding
-            </strong>:
-
-            User selected
-            <strong>
-                ${state.selectedSymptoms.size}
-            </strong>
-            symptoms.
-
-            <br>
-
-            <strong>
-                Step 2: Weighted Overlap Calculation
-            </strong>:
-
-            Matched
-            <strong>
-                ${primaryData.matchedPrimaryCount}
-            </strong>
-            Primary and
-            <strong>
-                ${primaryData.matchedSecondaryCount}
-            </strong>
-            Secondary clinical markers
-            (
-                ${escapeHTML(
-                    matchedSymptomsList || 'None'
-                )}
-            ).
-
-            <br>
-
-            <strong>
-                Step 3: Score Normalization
-            </strong>:
-
-            Core symptom coverage =
-            <strong>
-                ${Math.round(
-                    primaryData.primaryCoverage * 100
-                )}%
-            </strong>,
-
-            yielding a matching confidence score of
-            <strong>
-                ${primaryData.confidence}%
-            </strong>.
-
-            <br><br>
-
-            <small style="color:var(--text-dim);">
-                Note: This is an algorithmic symptom-matching score,
-                not a clinically validated diagnosis or medical probability.
-            </small>
-        `;
-    }
+    renderMathExplanation(
+        primaryData
+    );
 }
 
 
 /* ==========================================================================
-   Accordion Interactivity
+   RENDER LIST
    ========================================================================== */
 
-function toggleAccordion(headerElement) {
+function renderList(
+    element,
+    items
+) {
 
-    if (!headerElement) return;
+    if (!element) {
+        return;
+    }
+
+
+    if (
+        !Array.isArray(items) ||
+        items.length === 0
+    ) {
+
+        element.innerHTML =
+            '<li>None specified.</li>';
+
+        return;
+    }
+
+
+    element.innerHTML =
+        items
+            .map(
+                item =>
+                    `<li>${escapeHTML(
+                        item
+                    )}</li>`
+            )
+            .join('');
+}
+
+
+/* ==========================================================================
+   DIFFERENTIAL RENDERING
+   ========================================================================== */
+
+function renderDifferentials(
+    differentials
+) {
+
+    if (!elements.differentialList) {
+        return;
+    }
+
+
+    if (
+        !Array.isArray(differentials) ||
+        differentials.length === 0
+    ) {
+
+        elements.differentialList.innerHTML = `
+
+            <div style="
+                font-size:0.8rem;
+                color:var(--text-dim);
+                padding:0.5rem 0;
+            ">
+                No significant secondary
+                differential candidates detected.
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    elements.differentialList.innerHTML =
+        differentials
+            .map(diff => {
+
+                const name =
+                    diff.disease?.name ||
+                    'Unknown';
+
+
+                const category =
+                    diff.disease?.category ||
+                    '';
+
+
+                return `
+
+                    <div class="diff-item">
+
+                        <div class="diff-name-box">
+
+                            <div class="diff-title">
+                                ${escapeHTML(name)}
+                            </div>
+
+                            <div class="diff-category">
+                                ${escapeHTML(category)}
+                            </div>
+
+                        </div>
+
+
+                        <div class="diff-bar-wrapper">
+
+                            <div class="diff-progress-bg">
+
+                                <div
+                                    class="diff-progress-fill"
+                                    style="
+                                        width:${diff.confidence}%;
+                                    "
+                                ></div>
+
+                            </div>
+
+
+                            <span class="diff-pct">
+                                ${diff.confidence}%
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            })
+            .join('');
+}
+
+
+/* ==========================================================================
+   MATHEMATICAL EXPLANATION
+   ========================================================================== */
+
+function renderMathExplanation(
+    primaryData
+) {
+
+    if (!elements.liveMathExplanation) {
+        return;
+    }
+
+
+    const matchedSymptoms = [
+        ...primaryData.matchedPrimaryNames,
+        ...primaryData.matchedSecondaryNames
+    ];
+
+
+    const matchedSymptomsList =
+        matchedSymptoms.length > 0
+            ? matchedSymptoms.join(', ')
+            : 'None';
+
+
+    const coverage =
+        Math.round(
+            primaryData.primaryCoverage *
+            100
+        );
+
+
+    elements.liveMathExplanation.innerHTML = `
+
+        <strong>
+            Step 1: Input Vector Encoding
+        </strong>
+
+        : User selected
+
+        <strong>
+            ${state.selectedSymptoms.size}
+        </strong>
+
+        symptoms.
+
+        <br><br>
+
+        <strong>
+            Step 2: Weighted Overlap Calculation
+        </strong>
+
+        : Matched
+
+        <strong>
+            ${primaryData.matchedPrimaryCount}
+        </strong>
+
+        Primary and
+
+        <strong>
+            ${primaryData.matchedSecondaryCount}
+        </strong>
+
+        Secondary clinical markers:
+
+        <strong>
+            ${escapeHTML(
+                matchedSymptomsList
+            )}
+        </strong>.
+
+        <br><br>
+
+        <strong>
+            Step 3: Score Normalization
+        </strong>
+
+        : Core symptom coverage =
+
+        <strong>
+            ${coverage}%
+        </strong>.
+
+        The resulting algorithmic matching
+        confidence score is
+
+        <strong>
+            ${primaryData.confidence}%
+        </strong>.
+
+        <br><br>
+
+        <small style="color:var(--text-dim);">
+
+            This score is generated from the application's
+            symptom-weighting algorithm. It is not a
+            clinically validated probability or diagnosis.
+
+        </small>
+    `;
+}
+
+
+/* ==========================================================================
+   ACCORDION
+   ========================================================================== */
+
+function toggleAccordion(
+    headerElement
+) {
+
+    if (!headerElement) {
+        return;
+    }
 
 
     const item =
         headerElement.parentElement;
 
 
-    if (!item) return;
+    if (!item) {
+        return;
+    }
 
 
     const content =
@@ -1403,16 +1918,21 @@ function toggleAccordion(headerElement) {
         );
 
 
-    if (!content) return;
+    if (!content) {
+        return;
+    }
 
 
-    if (
+    const isClosed =
         content.style.display === 'none' ||
-        content.style.display === ''
-    ) {
+        content.style.display === '';
+
+
+    if (isClosed) {
 
         content.style.display =
             'block';
+
 
         if (arrow) {
             arrow.textContent = '▲';
@@ -1423,21 +1943,23 @@ function toggleAccordion(headerElement) {
         content.style.display =
             'none';
 
+
         if (arrow) {
             arrow.textContent = '▼';
         }
+
     }
 }
 
 
 /* ==========================================================================
-   Event Listeners
+   EVENT LISTENERS
    ========================================================================== */
 
 function setupEventListeners() {
 
     /* ----------------------------------------------------------------------
-       Theme toggle
+       Theme
        ---------------------------------------------------------------------- */
 
     if (elements.themeToggleBtn) {
@@ -1446,6 +1968,7 @@ function setupEventListeners() {
             'click',
             toggleTheme
         );
+
     }
 
 
@@ -1460,16 +1983,18 @@ function setupEventListeners() {
             event => {
 
                 state.searchQuery =
-                    event.target.value;
+                    event.target.value || '';
 
                 renderSymptomGrid();
+
             }
         );
+
     }
 
 
     /* ----------------------------------------------------------------------
-       Clear all symptoms
+       Clear all
        ---------------------------------------------------------------------- */
 
     if (elements.clearAllBtn) {
@@ -1483,8 +2008,10 @@ function setupEventListeners() {
                 renderSymptomGrid();
 
                 updateUI();
+
             }
         );
+
     }
 
 
@@ -1499,28 +2026,35 @@ function setupEventListeners() {
             () => {
 
                 if (
-                    typeof DEMO_PRESETS !== 'undefined' &&
-                    Array.isArray(DEMO_PRESETS) &&
+                    typeof DEMO_PRESETS !==
+                        'undefined' &&
+                    Array.isArray(
+                        DEMO_PRESETS
+                    ) &&
                     DEMO_PRESETS.length > 0
                 ) {
 
                     loadPreset(
-                        DEMO_PRESETS[0].symptoms || []
+                        DEMO_PRESETS[0]
+                            .symptoms || []
                     );
 
                 } else {
 
-                    console.error(
-                        'MedSense AI: No demo presets available.'
+                    console.warn(
+                        'MedSense AI: No demo preset found.'
                     );
+
                 }
+
             }
         );
+
     }
 
 
     /* ----------------------------------------------------------------------
-       Print report
+       Print
        ---------------------------------------------------------------------- */
 
     if (elements.printReportBtn) {
@@ -1528,43 +2062,87 @@ function setupEventListeners() {
         elements.printReportBtn.addEventListener(
             'click',
             () => {
+
                 window.print();
+
             }
         );
+
     }
 }
 
 
 /* ==========================================================================
-   Utility Functions
+   UTILITY: SET TEXT
    ========================================================================== */
 
-/**
- * Safely set textContent on an element.
- */
-function setText(element, value) {
+function setText(
+    element,
+    value
+) {
 
-    if (!element) return;
+    if (!element) {
+        return;
+    }
+
 
     element.textContent =
-        value == null ? '' : String(value);
+        value == null
+            ? ''
+            : String(value);
 }
 
 
-/**
- * Escape HTML to prevent accidental HTML injection
- * when rendering dynamic text.
- */
+/* ==========================================================================
+   UTILITY: ESCAPE HTML
+   ========================================================================== */
+
 function escapeHTML(value) {
 
     if (value == null) {
         return '';
     }
 
+
     return String(value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+        .replace(
+            /&/g,
+            '&amp;'
+        )
+        .replace(
+            /</g,
+            '&lt;'
+        )
+        .replace(
+            />/g,
+            '&gt;'
+        )
+        .replace(
+            /"/g,
+            '&quot;'
+        )
+        .replace(
+            /'/g,
+            '&#039;'
+        );
 }
+
+
+/* ==========================================================================
+   GLOBAL ERROR HELPER
+   ========================================================================== */
+
+/*
+ * Expose these functions globally if your HTML uses inline handlers such as:
+ *
+ * onclick="toggleAccordion(this)"
+ */
+
+window.toggleAccordion =
+    toggleAccordion;
+
+window.toggleSymptom =
+    toggleSymptom;
+
+window.loadPreset =
+    loadPreset;
